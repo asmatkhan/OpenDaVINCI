@@ -309,11 +309,14 @@ namespace cockpit {
 
                 // Draw scene. Retrieve the point cloud from the shared memory and visualize it frame by frame when shared point cloud is received via the nextContainer method
                 if (m_velodyneSharedMemory.get() != NULL) {
+                    std::cout << "m_velodyneSharedMemory is not null" << std::endl;
                     if (m_velodyneSharedMemory->isValid()) {
+                        std::cout << "m_velodyneSharedMemory is valid" << std::endl;
                         // Using a scoped lock to lock and automatically unlock a shared memory segment.
                         odcore::base::Lock lv(m_velodyneSharedMemory);
                         if (m_velodyneFrame.getComponentDataType() == SharedPointCloud::FLOAT_T
                             && (m_velodyneFrame.getNumberOfComponentsPerPoint() == 4)) {
+                            std::cout << "getComponentDataType is float and getNumberOfComponentsPerPoint is 4" << std::endl;
                             glPushMatrix();
                             {
                                 // Translate the model.
@@ -367,6 +370,7 @@ namespace cockpit {
                                             } else{
                                                 glColor3f(0.55f + intensityLevel, 0.0f, 0.0f);
                                             }
+                                            std::cout << "(x,y,z): " << std::to_string(velodyneRawData[startID]) << "," << std::to_string(velodyneRawData[startID + 1]) << "," <<  std::to_string(velodyneRawData[startID+2]) << std::endl; 
                                             glVertex3f(velodyneRawData[startID], velodyneRawData[startID + 1], velodyneRawData[startID+2]);
                                             startID += m_velodyneFrame.getNumberOfComponentsPerPoint();
                                         }
@@ -624,14 +628,15 @@ namespace cockpit {
             void EnvironmentViewerGLWidget::nextContainer(Container &c) {
                 
                 if(c.getDataType() == odcore::data::SharedPointCloud::ID()){
+                    std::cout << "Received SharedPointCloud." << std::cout::endl;
                     m_SPCReceived = true;
                     m_velodyneFrame = c.getData<SharedPointCloud>();//Get shared point cloud
                     if (!m_hasAttachedToSharedImageMemory) {
+                        std::cout << "Attached SharedPointCloud." << std::cout::endl;
                         m_velodyneSharedMemory=SharedMemoryFactory::attachToSharedMemory(m_velodyneFrame.getName()); // Attach the shared point cloud to the shared memory.
                         m_hasAttachedToSharedImageMemory = true; 
                     }  
                 }
-                
                 if(c.getDataType() == odcore::data::CompactPointCloud::ID()){
                     m_CPCreceived = true;
                     TimeStamp ts = c.getSampleTimeStamp();
